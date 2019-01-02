@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>waterfull-lazyload-ajax demo</title>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <style>
+        html,body,ul,li,p,div{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+        ul,li{
+            list-style: none;
+        }
+        .ct-waterfall{
+            width: 900px;
+            margin: 0 auto;
+        }
+        .clearfix::after{
+            content:'';
+            display: block;
+            clear:both;
+
+        }
+        #pic-ct{
+            position:relative;
+        }
+        #pic-ct .item{
+            position: absolute;
+            padding:0 0 10px 0;
+            width:280px;
+            border: 1px solid #DFDFDF;
+            background: #fff;
+            transition:all .8s;
+            /* opacity:0; */
+        }
+
+        #pic-ct .item img{
+            margin:10px;
+            width:260px;
+        }
+
+        #pic-ct .item .header{
+            height: 25px;
+            margin: 0 12px;
+            border-bottom: 1px solid #DBDBDB;
+
+        }
+        #pic-ct .desp{
+            font-size: 12px;
+            line-height: 1.8;
+            margin: 10px 15px 0;
+            color: #777371;
+        }
+        
+    
+    </style>
+</head>
+<body>
+    <div class="ct-waterfall">
+        <ul id="pic-ct" class="clearfix">
+            <li class="item">
+                <a href="#">
+                    <img src="http://s.img.mix.sina.com.cn/auto/resize?img=http%3A%2F%2Fwww.sinaimg.cn%2Fdy%2Fslidenews%2F5_img%2F2016_09%2F453_75615_657883.jpg&size=250_0" alt="">
+                </a>
+                <h4 class="header">标题</h4>
+                <p class="desp">描述</p>                    
+            </li>
+            <li class="item hide"></li>
+        </ul>
+        <div id="load">我是看不见的</div>
+    </div>  
+</body>
+<script>
+    var curPage =1
+    var perPageCount =10
+    var colSumHeight =[]
+    var nodeWidth =$('.item').outerWidth(true)
+    var colNum =parseInt($('#pic-ct').width()/nodeWidth)
+    for(var i=0;i<colNum;i++){
+        colSumHeight[i]=0
+    }
+    var isDataArrive
+    start()
+    function start(){
+        getData(function(newsList){ //1获取10条数据
+            isDataArrive =true
+            $.each(newsList,function(idx,news){ 
+                var $node =getNode(news)//对获取的数据数组，一一遍历，拼装jquery对象
+                $node.find('img').load(function(){
+                    $('#pic-ct').append($node)//当数据内的图像加载后，就把node展示到页面上
+                    waterFallPlace($node) //把要展示的数据，按照瀑布流的方式排列
+                })
+            })
+        })
+        isDataArrive=false 
+    }
+    $(window).scroll(function(){
+        
+        if(!isDataArrive){return }
+      
+        if(isVisible($('#load'))){
+            start()  
+        }
+    })
+    // getData函数：发送ajax每次获取perPageCount条（这里设置是10条）数据，获取次数用curPage计算
+    function getData(callback){
+        $.ajax({
+            url:'http://platform.sina.com.cn/slide/album_tech',
+            dataType:'jsonp',
+            data:{
+                app_key:'1271687855',
+				num: perPageCount,
+				page: curPage
+            },
+            jsonp:"jsoncallback"
+        }).done(function(ret){
+            if(ret && ret.status && ret.status.code ==="0"){
+                callback(ret.data);
+                curPage++
+            }else{
+                console.log('get error data')
+            }
+        })
+    }
+    //getnode函数：把每次获取的10条数据，拼装成jquery对象$node
+    function getNode(item){
+        var tpl=''
+        tpl +='<li class="item">' //这里很容易出错+放在‘’内部
+        tpl +='<a href="'+item.url+'" class="link"><img src="'+ item.img_url +'" alt="">'
+        tpl +='<h4 class="header">'+ item.short_name+'</h4>'
+        tpl +='<p class="desp">'+ item.short_intro+'</p>'
+        tpl +='</li>'
+        return $(tpl)
+    }
+    //waterFallPlace函数：把每次获取并显示页面10条的数据按照瀑布流的方式排列
+    function waterFallPlace($node){
+        var idx = 0
+        var minSumHeight =colSumHeight[0]
+
+        for(var i=0;i<colNum;i++){
+            if(colSumHeight[i]< minSumHeight){
+                minSumHeight=colSumHeight[i]
+                idx=i
+            }
+        }
+        $node.css({
+            left:nodeWidth*idx,
+            top:minSumHeight,
+            // opacity:1
+        })
+        colSumHeight[idx] +=$node.outerHeight(true) //不要把h写成小写的
+        $('#pic-ct').height(Math.max.apply(null,colSumHeight))
+    }
+    function isVisible($el){
+        return $el.offset().top < ($(window).height()+$(window).scrollTop() )
+    }
+    // function checkShow(){
+    //     if(isShow($('#load'))){
+    //         loadAndPlace()
+    //     }
+    // }
+    // function isShow($el){
+	//   var scrollH = $(window).scrollTop(),
+	//   	  winH = $(window).height(),
+	//   	  top = $el.offset().top;
+
+  	//   if(top < winH + scrollH){
+  	//   	return true;
+  	//   }else{
+  	//   	return false;
+  	//   }
+	// }
+
+
+// getData函数：发送ajax每次获取perPageCount条（这里设置是10条）数据，获取次数用curPage计算
+//getnode函数：把每次获取的10条数据，拼装成jquery对象$node
+//waterFallPlace函数：把每次获取并显示页面10条的数据按照瀑布流的方式排列
+
+// 两次状态判断：1、 isDataArrive让发送数据过程，不能重复发送
+// 2、 isVisible判断元素是否到底了
+
+</script>
+</html>

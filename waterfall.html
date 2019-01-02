@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+  <style>
+    .waterfall{
+      max-width:600px;
+      margin:0 auto;
+      
+    }
+    .waterfall img{
+      width:100px;
+      position:absolute;
+      margin:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="waterfall">
+    <img src="http://via.placeholder.com/100x100" alt="300*100">
+    <img src="http://via.placeholder.com/100x70" alt="300*70">
+    <img src="http://via.placeholder.com/100x150" alt="300*150">
+    <img src="http://via.placeholder.com/100x250" alt="300*250">
+    <img src="http://via.placeholder.com/100x80" alt="300*80">
+    <img src="http://via.placeholder.com/100x90" alt="300*90">
+    <img src="http://via.placeholder.com/100x120" alt="300*120">
+    <img src="http://via.placeholder.com/100x210" alt="300*210">
+    <img src="http://via.placeholder.com/100x230" alt="300*230">
+    <img src="http://via.placeholder.com/100x130" alt="300*130">
+    <img src="http://via.placeholder.com/100x100" alt="300*100">
+    <img src="http://via.placeholder.com/100x70" alt="300*70">
+    <img src="http://via.placeholder.com/100x150" alt="300*150">
+    <img src="http://via.placeholder.com/100x250" alt="300*250">
+    <img src="http://via.placeholder.com/100x80" alt="300*80">
+    <img src="http://via.placeholder.com/100x90" alt="300*90">
+    <img src="http://via.placeholder.com/100x120" alt="300*120">
+    <img src="http://via.placeholder.com/100x210" alt="300*210">
+    <img src="http://via.placeholder.com/100x230" alt="300*230">
+    <img src="http://via.placeholder.com/100x130" alt="300*130">
+    <img src="http://via.placeholder.com/100x100" alt="300*100">
+    <img src="http://via.placeholder.com/100x70" alt="300*70">
+    <img src="http://via.placeholder.com/100x150" alt="300*150">
+    <img src="http://via.placeholder.com/100x250" alt="300*250">
+    <img src="http://via.placeholder.com/100x80" alt="300*80">
+    <img src="http://via.placeholder.com/100x90" alt="300*90">
+    <img src="http://via.placeholder.com/100x120" alt="300*120">
+    <img src="http://via.placeholder.com/100x210" alt="300*210">
+    <img src="http://via.placeholder.com/100x230" alt="300*230">
+    <img src="http://via.placeholder.com/100x130" alt="300*130">
+  </div>
+<script>
+  
+  var colCount //每一行放图片的高度
+  var colHeightArray =[]  //每一列图片的高度
+  var imgWidth =$('.waterfall img').outerWidth(true)
+  colCount=Math.floor($('.waterfall').width()/$('.waterfall img').outerWidth(true))
+  //用outerwidth是包括了img的外边距，展示的是img占据的所有宽度，有div的嵌套也不会计算错宽度
+  //console.log(colCount)
+  for(var i=0;i<colCount;i++){
+    colHeightArray[i] =0
+  }
+  //设置colheight初始化
+  
+  $('.waterfall img').on('load',function(){
+    var minValue=colHeightArray[0]
+    var minIndex=0 //注意minvalue和minindex的定义必须要放在onload函数内部，不然会出错在函数执行的时候minvalue和minindex永远都是0
+    for(var i=0;i<colCount;i++){
+      if(colHeightArray[i]<minValue){
+        minValue=colHeightArray[i]
+        minIndex=i
+      }
+    } //获取高度最小值
+    
+    $(this).css({
+      left:minIndex * imgWidth,
+      top:minValue 
+    }) //设置imgabsolute的偏移量
+    colHeightArray[minIndex] +=$(this).outerHeight(true)
+  })//变更colheight的高度变化，注意this要转换成jquery对象
+</script>
+</body>
+</html>
